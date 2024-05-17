@@ -1,16 +1,16 @@
 # Find sequences for primers with degenerate bases according to selected panel of varieties. Input
 # When you get sequences from GT they use the IUPAC alleles taking ALL of the lines into consideration. This script will get the IUPAC sequences taking only selected lines into consideration.
-
+#library(spgs)
 #### INPUTS ####
-path <- "LT_DM_EZ_V06/" #path to snp folder
-affy <- "775d001a-76e4-44bf-b830-04b7ce1e2a83-DM_EZ_V06_SNP1.matrix.affymetrix" #GT's affymetrix formated export for the region of the SNP plus/minus 100bp
-snp_pos <- 53726322 #paste bp position of SNP
+affy <- "LT_DM_Bejo/17b962dd-2df8-4f48-b219-a28845946df3-DM_Bejo_8.5.matrix.affymetrix" #GT's affymetrix formated export for the region of the SNP plus/minus 100bp
+snp_pos <- 52830615 #paste bp position of SNP
+strand <- "minus"
 #copy+paste sequence of snp plus/minus 100bp
-snp_seq <- "ATTCTGCCTATATATATACACCTCTCTGTAGCCTTCTCAACAGCACCACCACCCCCAAACACCAACAATGGTGTCTTCTTCTCCGGCACAGGCCATCTTTCACCTTACACTGTTACTTATCATATCTTCATGTATACCTCCTTCCTTTTCCCAAAGCACTCCGGCAACGACATCACCACCCACCAAGATTGGCAATGGCTA"
+snp_seq <- "GTGCATTCTCAAATGATGAACTCGAGGAAATAGTCTATGTGGAATAACCACCAGGTTTCGTAAACGAGGAATTTCCAAACCATGTTATACTTTTGGATAAGGCGGTGTACGGCTTAAAACAAGCATCTCATGCATGGTATGAAACTCTAACTCGGTTTTTGAAACAATCAAAATTTAAACAAGGTTCGGTTGACCCAACCT"
 ################
 
 #get affymetrix table from region of interest
-snp <- read.table(paste0(path, affy), sep = "\t", header = T) #import GT's affymetrix
+snp <- read.table(affy, sep = "\t", header = T, tryLogical = F) #import GT's affymetrix
 snp <- snp[,-c(1,3)] #remove contig and ranking columns
 snp <- snp[,-grep("FREQUENCY|COVERAGE", colnames(snp))] #subset to just the allele info
 rownames(snp) <- snp$Position
@@ -27,7 +27,10 @@ snp <- snp[,colnames(snp) %in% lines]
 #get the full sequence from the reference genome
 snp_seq <- unlist(strsplit(snp_seq, "")) #convert ref sequence to vector
 length(snp_seq)==201 #check that it's the right length
-snp_df <- data.frame("bp"=c((snp_pos-100):(snp_pos+100)), "ref"=snp_seq) #make dataframe with each nucleoride as a row in the "seq" column and the bp position in the genome as the "bp" column
+
+#make dataframe with each nucleoride as a row in the "seq" column and the bp position in the genome as the "bp" column
+if(strand=="plus"){snp_df <- data.frame("bp"=c((snp_pos-100):(snp_pos+100)), "ref"=snp_seq)}
+if(strand=="minus"){snp_df <- data.frame("bp"=c((snp_pos-101):(snp_pos+99)), "ref"=snp_seq)}
 
 #merge full sequence with SNPs
 snp$bp <- as.numeric(rownames(snp)) #create bp column to merge by
@@ -37,6 +40,7 @@ snp <- snp[,-1] #remove bp column
 #function to convert vector of nucleotides to iupac letter
 allele2iupac <- function(allele){
   allele = as.character(na.omit(as.character(allele)))
+  allele = unlist(strsplit(allele, "/")) #split heterozygous alleles so that both are considered
   if(all(unique(allele)=="A")){"A"}
   else if(all(unique(allele)=="T")){"T"}
   else if(all(unique(allele)=="C")){"C"}
@@ -58,5 +62,5 @@ allele2iupac <- function(allele){
 snp$iupac <- apply(snp, 1, allele2iupac)
 
 #return sequence with iupac alleles
-paste0(snp$iupac, collapse = "")
-
+if(strand=="plus"){paste0(snp$iupac, collapse = "")}
+if(strand=="minus"){toupper(spgs::reverseComplement(paste0(snp$iupac, collapse = ""), case="upper"))}
