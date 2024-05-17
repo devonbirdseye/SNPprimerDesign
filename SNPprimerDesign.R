@@ -1,10 +1,10 @@
-# Find sequences for primers with degenerate bases according to selected panel of varieties. Input
+# Find sequences for primers with degenerate bases according to selected panel of varieties. Input affymetrix of alleles for each variety within a selected region, position of SNP for which you want surrounding sequence (+/- 100bp), indication of whether it's plus or minus strand, and the reference sequence for this region.
 # When you get sequences from GT they use the IUPAC alleles taking ALL of the lines into consideration. This script will get the IUPAC sequences taking only selected lines into consideration.
 #library(spgs)
 #### INPUTS ####
 affy <- "LT_DM_Bejo/17b962dd-2df8-4f48-b219-a28845946df3-DM_Bejo_8.5.matrix.affymetrix" #GT's affymetrix formated export for the region of the SNP plus/minus 100bp
 snp_pos <- 52830615 #paste bp position of SNP
-strand <- "minus"
+strand <- "minus" #indicate whether the sequence is on the plus or minus strand
 #copy+paste sequence of snp plus/minus 100bp
 snp_seq <- "GTGCATTCTCAAATGATGAACTCGAGGAAATAGTCTATGTGGAATAACCACCAGGTTTCGTAAACGAGGAATTTCCAAACCATGTTATACTTTTGGATAAGGCGGTGTACGGCTTAAAACAAGCATCTCATGCATGGTATGAAACTCTAACTCGGTTTTTGAAACAATCAAAATTTAAACAAGGTTCGGTTGACCCAACCT"
 ################
