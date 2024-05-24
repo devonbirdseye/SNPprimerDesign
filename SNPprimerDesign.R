@@ -2,12 +2,16 @@
 # When you get sequences from GT they use the IUPAC alleles taking ALL of the lines into consideration. This script will get the IUPAC sequences taking only selected lines into consideration.
 #library(spgs)
 #### INPUTS ####
-affy <- "LT_DM_Bejo/17b962dd-2df8-4f48-b219-a28845946df3-DM_Bejo_8.5.matrix.affymetrix" #GT's affymetrix formated export for the region of the SNP plus/minus 100bp
-snp_pos <- 52830615 #paste bp position of SNP
-strand <- "minus" #indicate whether the sequence is on the plus or minus strand
-#copy+paste sequence of snp plus/minus 100bp
-snp_seq <- "GTGCATTCTCAAATGATGAACTCGAGGAAATAGTCTATGTGGAATAACCACCAGGTTTCGTAAACGAGGAATTTCCAAACCATGTTATACTTTTGGATAAGGCGGTGTACGGCTTAAAACAAGCATCTCATGCATGGTATGAAACTCTAACTCGGTTTTTGAAACAATCAAAATTTAAACAAGGTTCGGTTGACCCAACCT"
+
+affy <- "LT_DM_Syngenta_SG01/97f194f3-5ce2-4ca0-8ac6-8b21185d8c47-SG01_16.matrix.affymetrix" #GT's affymetrix formated export for the region of the SNP plus/minus 100bp
+snp_pos <- 10281709
+ #paste bp position of SNP
+strand <- "plus" #indicate whether the sequence is on the plus or minus strand
+#copy+paste the sequence of snp plus/minus 100bp (should be 201bp)
+snp_seq <- "TAAAATTAAAACCGGTTCACAGTATGAGAAGCGGTTCTGTGATTTAAAGAACCGGTGTGTAGACGGTTTAACGACCTGGCCCAACATTCCATGAACCACCAGACTGGTTTTGGGCAATTTAGTCGGGTACCTGCCTTTGCTCACACTGAGTTTTTTTTTTAAATAAATTTGATTGCTTAAAGATTATAAATATAACGTATT"
 ################
+
+if(strand=="minus"){snp_seq <- toupper(paste0(spgs::reverseComplement(snp_seq), collapse = ""))}
 
 #get affymetrix table from region of interest
 snp <- read.table(affy, sep = "\t", header = T, tryLogical = F) #import GT's affymetrix
@@ -29,9 +33,9 @@ snp_seq <- unlist(strsplit(snp_seq, "")) #convert ref sequence to vector
 length(snp_seq)==201 #check that it's the right length
 
 #make dataframe with each nucleoride as a row in the "seq" column and the bp position in the genome as the "bp" column
-if(strand=="plus"){snp_df <- data.frame("bp"=c((snp_pos-100):(snp_pos+100)), "ref"=snp_seq)}
-if(strand=="minus"){snp_df <- data.frame("bp"=c((snp_pos-101):(snp_pos+99)), "ref"=snp_seq)}
-
+snp_df <- data.frame("bp"=c((snp_pos-100):(snp_pos+100)), "ref"=snp_seq)
+10281709-100
+10281709+100
 #merge full sequence with SNPs
 snp$bp <- as.numeric(rownames(snp)) #create bp column to merge by
 snp <- merge.data.frame(snp_df, snp, by = "bp", all.x = T)
@@ -62,5 +66,6 @@ allele2iupac <- function(allele){
 snp$iupac <- apply(snp, 1, allele2iupac)
 
 #return sequence with iupac alleles
+
 if(strand=="plus"){paste0(snp$iupac, collapse = "")}
 if(strand=="minus"){toupper(spgs::reverseComplement(paste0(snp$iupac, collapse = ""), case="upper"))}
