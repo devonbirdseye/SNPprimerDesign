@@ -1,14 +1,21 @@
 # Find sequences for primers with degenerate bases according to selected panel of varieties. Input affymetrix of alleles for each variety within a selected region, position of SNP for which you want surrounding sequence (+/- 100bp), indication of whether it's plus or minus strand, and the reference sequence for this region.
 # When you get sequences from GT they use the IUPAC alleles taking ALL of the lines into consideration. This script will get the IUPAC sequences taking only selected lines into consideration.
 #library(spgs)
-#### INPUTS ####
 
-affy <- "LT_DM_Syngenta_SG01/97f194f3-5ce2-4ca0-8ac6-8b21185d8c47-SG01_16.matrix.affymetrix" #GT's affymetrix formated export for the region of the SNP plus/minus 100bp
-snp_pos <- 10281709
+#### INPUTS ####
+affy <- "LT_DM_Bejo_US20200029523/47a9ede7-7a7b-4847-8bf8-8aad3fb48b18-Bejo29523_8414761.matrix.affymetrix" #GT's affymetrix formated export for the region of the SNP plus/minus 100bp
+snp_pos <- 8414761
  #paste bp position of SNP
-strand <- "plus" #indicate whether the sequence is on the plus or minus strand
+strand <- "minus" #indicate whether the sequence is on the plus or minus strand
 #copy+paste the sequence of snp plus/minus 100bp (should be 201bp)
-snp_seq <- "TAAAATTAAAACCGGTTCACAGTATGAGAAGCGGTTCTGTGATTTAAAGAACCGGTGTGTAGACGGTTTAACGACCTGGCCCAACATTCCATGAACCACCAGACTGGTTTTGGGCAATTTAGTCGGGTACCTGCCTTTGCTCACACTGAGTTTTTTTTTTAAATAAATTTGATTGCTTAAAGATTATAAATATAACGTATT"
+snp_seq <- "TAACTGCCTTAAGTGTTGAGGCATCCGGTCAGAGAAACTGGTTCGACTGGGATAGCCAAAACCGACCAAGTTACGGTTCACCCATAGCTATTTGTCATACCCGTTCTTCTTAGGGGCTTTCTGGTTTATGATGAATGCATGGATGCCTCACCGCTAAGAGAACGTATGCACGCCAGACTGGGTAGAGGAGTTGAAGTAGTA"
+
+#select varieties you want to choose alleles from
+line_table <- read.csv("SKT_Lettuce_reseq100_v8_GTprojecLineInfo.csv") #import info table about lines in the resequencing panel on GT
+#lines <- line_table$NAME
+#lines <- line_table$NAME[line_table$Species %in% c("L. sativa")]
+#lines <- line_table$NAME[line_table$Crop.type == "Crisp"]
+lines <- line_table$NAME[line_table$Accession %in% c("Salinas", "CGN11402")]
 ################
 
 if(strand=="minus"){snp_seq <- toupper(paste0(spgs::reverseComplement(snp_seq), collapse = ""))}
@@ -20,12 +27,8 @@ snp <- snp[,-grep("FREQUENCY|COVERAGE", colnames(snp))] #subset to just the alle
 rownames(snp) <- snp$Position
 snp[snp==""] <- NA
 
-#select varieties you want to choose alleles from
-line_table <- read.csv("SKT_Lettuce_reseq100_v8_GTprojecLineInfo.csv") #import info table about lines in the resequencing panel on GT
-lines <- line_table$NAME[line_table$Species %in% c("L. sativa", "L. serriola")] #select the lines you want to consider when choosing degenerate bases
-lines <- paste0(sub("-", ".", lines), "_ALLELE") #make line names match column names of snp table
-
 #filter snp table to just the chosen lines
+lines <- paste0(sub("-", ".", lines), "_ALLELE") #make line names match column names of snp table
 snp <- snp[,colnames(snp) %in% lines]
 
 #get the full sequence from the reference genome
@@ -34,8 +37,6 @@ length(snp_seq)==201 #check that it's the right length
 
 #make dataframe with each nucleoride as a row in the "seq" column and the bp position in the genome as the "bp" column
 snp_df <- data.frame("bp"=c((snp_pos-100):(snp_pos+100)), "ref"=snp_seq)
-10281709-100
-10281709+100
 #merge full sequence with SNPs
 snp$bp <- as.numeric(rownames(snp)) #create bp column to merge by
 snp <- merge.data.frame(snp_df, snp, by = "bp", all.x = T)
@@ -66,6 +67,5 @@ allele2iupac <- function(allele){
 snp$iupac <- apply(snp, 1, allele2iupac)
 
 #return sequence with iupac alleles
-
 if(strand=="plus"){paste0(snp$iupac, collapse = "")}
 if(strand=="minus"){toupper(spgs::reverseComplement(paste0(snp$iupac, collapse = ""), case="upper"))}
