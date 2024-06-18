@@ -2,21 +2,26 @@
 # When you get sequences from GT they use the IUPAC alleles taking ALL of the lines into consideration. This script will get the IUPAC sequences taking only selected lines into consideration.
 #library(spgs)
 
-#### INPUTS ####
-affy <- "LT_DM_Bejo_US20200029523/47a9ede7-7a7b-4847-8bf8-8aad3fb48b18-Bejo29523_8414761.matrix.affymetrix" #GT's affymetrix formated export for the region of the SNP plus/minus 100bp
-snp_pos <- 8414761
- #paste bp position of SNP
-strand <- "minus" #indicate whether the sequence is on the plus or minus strand
-#copy+paste the sequence of snp plus/minus 100bp (should be 201bp)
-snp_seq <- "TAACTGCCTTAAGTGTTGAGGCATCCGGTCAGAGAAACTGGTTCGACTGGGATAGCCAAAACCGACCAAGTTACGGTTCACCCATAGCTATTTGTCATACCCGTTCTTCTTAGGGGCTTTCTGGTTTATGATGAATGCATGGATGCCTCACCGCTAAGAGAACGTATGCACGCCAGACTGGGTAGAGGAGTTGAAGTAGTA"
 
-#select varieties you want to choose alleles from
+################################################ INPUTS ##################################################
+affy <- "LT_DM_EZ_V10/9f1291de-5011-438a-bbe4-45d1a2167d8a-V10_119640122.matrix.affymetrix" #GT's affymetrix formated export for the region of the SNP plus/minus 100bp
+snp_pos <- 119640122 #position of SNP (bp)
+strand <- "minus" #indicate whether the sequence is on the plus or minus strand
+#copy+paste the reference sequence of snp plus/minus 100bp (should be 201bp total). Be sure to copy the minus strand sequence if you indicated "minus" above
+snp_seq <- "AAACAGGGGAAGATCTTAAACCTGAATTAGAGAGTGCAATTAAGGCATCTCGGGCTTCTATTATTGTGTTGTCTAAGAACTACGCTTCTTCAACATGGTGTCTGGATGAACTGGTGTTGATCCTTGAGCAGCGTATCACATCCAACCACATTGTCATCCCCATATTTTATCATGTGGAGCCCACCCATGTCAGGAAGCAAC"
+
+#select the lines you want to pull alleles from
 line_table <- read.csv("SKT_Lettuce_reseq100_v8_GTprojecLineInfo.csv") #import info table about lines in the resequencing panel on GT
 #lines <- line_table$NAME
-#lines <- line_table$NAME[line_table$Species %in% c("L. sativa")]
+#lines <- line_table$NAME[line_table$Species %in% c("L. serriola")]
+lines <- line_table$NAME[line_table$Crop.type %in% c("Cos", "Crisp")]
 #lines <- line_table$NAME[line_table$Crop.type == "Crisp"]
-lines <- line_table$NAME[line_table$Accession %in% c("Salinas", "CGN11402")]
-################
+#lines <- line_table$NAME[line_table$Crop.type %in% c("Cos", "Crisp")|line_table$Accession == "CGN04683"]
+#lines <- line_table$NAME[line_table$Crop.type %in% c("Cos", "Crisp")|line_table$Species == "L. virosa"]
+#lines <- line_table$NAME[line_table$Accession %in% c("Salinas", "CGN15705")]
+###########################################################################################################
+#After adjusting above inputs, highlight all code and run
+
 
 if(strand=="minus"){snp_seq <- toupper(paste0(spgs::reverseComplement(snp_seq), collapse = ""))}
 
