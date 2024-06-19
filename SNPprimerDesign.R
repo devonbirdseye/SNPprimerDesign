@@ -1,9 +1,8 @@
 # Find sequences for primers with degenerate bases according to selected panel of varieties. Input affymetrix of alleles for each variety within a selected region, position of SNP for which you want surrounding sequence (+/- 100bp), indication of whether it's plus or minus strand, and the reference sequence for this region.
 # When you get sequences from GT they use the IUPAC alleles taking ALL of the lines into consideration. This script will get the IUPAC sequences taking only selected lines into consideration.
-#library(spgs)
+require(spgs)
 
-
-################################################ INPUTS ##################################################
+############################################################################ INPUTS ##########################################################################################
 affy <- "LT_DM_EZ_V10/9f1291de-5011-438a-bbe4-45d1a2167d8a-V10_119640122.matrix.affymetrix" #GT's affymetrix formated export for the region of the SNP plus/minus 100bp
 snp_pos <- 119640122 #position of SNP (bp)
 strand <- "minus" #indicate whether the sequence is on the plus or minus strand
@@ -19,8 +18,8 @@ lines <- line_table$NAME[line_table$Crop.type %in% c("Cos", "Crisp")]
 #lines <- line_table$NAME[line_table$Crop.type %in% c("Cos", "Crisp")|line_table$Accession == "CGN04683"]
 #lines <- line_table$NAME[line_table$Crop.type %in% c("Cos", "Crisp")|line_table$Species == "L. virosa"]
 #lines <- line_table$NAME[line_table$Accession %in% c("Salinas", "CGN15705")]
-###########################################################################################################
-#After adjusting above inputs, highlight all code and run
+##############################################################################################################################################################################
+#After adjusting above inputs, highlight all code and run!
 
 
 if(strand=="minus"){snp_seq <- toupper(paste0(spgs::reverseComplement(snp_seq), collapse = ""))}
